@@ -262,7 +262,6 @@ async function createDynamicRegion(lat, lng) {
 }
 
 // 4초 간격 서버 사이드 실시간 가상 참여자 수 및 메시지 변동 시뮬레이터
-// 4초 간격 서버 사이드 실시간 가상 참여자 수 및 메시지 변동 시뮬레이터
 function startSimulation() {
   setInterval(() => {
     checkAndResetSlot();
@@ -277,46 +276,43 @@ function startSimulation() {
     if (ratio < 0) ratio = 0;
     if (ratio > 1) ratio = 1;
 
-    // 1. 각 활성화 지역 인원 미세 변동
+    // 1. 각 활성화 지역 인원 미세 변동 (잠실만 진행)
     db.regions.forEach(region => {
       if (region.id === 'seoul_jamsil') {
         // 잠실 개표소: 1 ~ 99 범위 내에서 시간 진행률에 비례하여 증가
         // 3시간 타이머가 끝나 새 슬롯이 시작되면 checkAndResetSlot()에서 0으로 초기화된 후 다시 1부터 증가함
         region.baseCount = Math.max(1, Math.min(99, Math.floor(1 + ratio * 98)));
       } else {
-        const change = Math.floor(Math.random() * 9) - 4; // -4 ~ +4
-        region.baseCount = Math.max(10, region.baseCount + change);
+        // 잠실 외의 다른 지역은 시뮬레이션 인원을 0으로 유지 (실제 사용자 참여만 표시)
+        region.baseCount = 0;
       }
     });
 
-    // 2. 20% 확률로 가상 참여 한줄의견 게시
+    // 2. 20% 확률로 가상 참여 한줄의견 게시 (잠실만 진행)
     if (Math.random() < 0.20 && db.regions.length > 0) {
-      const randomRegion = db.regions[Math.floor(Math.random() * db.regions.length)];
-      const template = SIMULATED_TEMPLATES[Math.floor(Math.random() * SIMULATED_TEMPLATES.length)];
-      
-      const simLat = randomRegion.lat + (Math.random() * 0.003 - 0.0015);
-      const simLng = randomRegion.lng + (Math.random() * 0.003 - 0.0015);
+      const jamsilRegion = db.regions.find(r => r.id === 'seoul_jamsil');
+      if (jamsilRegion) {
+        const template = SIMULATED_TEMPLATES[Math.floor(Math.random() * SIMULATED_TEMPLATES.length)];
+        
+        const simLat = jamsilRegion.lat + (Math.random() * 0.003 - 0.0015);
+        const simLng = jamsilRegion.lng + (Math.random() * 0.003 - 0.0015);
 
-      const newMsg = {
-        id: 'sim_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-        regionId: randomRegion.id,
-        regionName: randomRegion.name,
-        message: template.message,
-        time: new Date(),
-        lat: simLat,
-        lng: simLng
-      };
+        const newMsg = {
+          id: 'sim_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+          regionId: jamsilRegion.id,
+          regionName: jamsilRegion.name,
+          message: template.message,
+          time: new Date(),
+          lat: simLat,
+          lng: simLng
+        };
 
-      db.messages.unshift(newMsg);
-      
-      // 최대 100개 피드 유지
-      if (db.messages.length > 100) {
-        db.messages.pop();
-      }
-
-      // 잠실이 아닌 경우에만 기지 카운터 가산 (잠실은 정확히 비례 계산식만 따름)
-      if (randomRegion.id !== 'seoul_jamsil') {
-        randomRegion.baseCount += Math.floor(Math.random() * 3) + 1;
+        db.messages.unshift(newMsg);
+        
+        // 최대 100개 피드 유지
+        if (db.messages.length > 100) {
+          db.messages.pop();
+        }
       }
     }
     

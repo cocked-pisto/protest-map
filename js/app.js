@@ -82,6 +82,8 @@ function renderProtestMarkers() {
   const regions = apiService.getRegionsData();
 
   regions.forEach(region => {
+    if (region.totalCount <= 0) return; // 참여자 수가 0명인 거점은 맵에 표시하지 않음
+
     // 붉은색 맥박(Pulse) 애니메이션을 가진 커스텀 DivIcon 정의
     const pulseIcon = L.divIcon({
       className: 'pulse-marker-wrapper',
@@ -128,42 +130,52 @@ function updateDashboard() {
   activeRegionsEl.textContent = stats.activeRegionsCount;
   myCheckinsEl.textContent = stats.userCheckInsCount;
 
-  // 2. 좌측 패널: 주요 집회 거점 리스트 렌더링
+  // 2. 좌측 패널: 주요 집회 거점 리스트 렌더링 (인원이 존재하는 곳만 노출)
   regionListEl.innerHTML = '';
-  regions.sort((a, b) => b.totalCount - a.totalCount).forEach(region => {
-    const item = document.createElement('div');
-    item.className = 'region-item';
-    item.innerHTML = `
-      <div class="region-info">
-        <span class="region-name">${region.name}</span>
-        <span class="region-desc">${region.description}</span>
-      </div>
-      <span class="region-count">${region.totalCount.toLocaleString()}명</span>
-    `;
+  const activeRegionsList = regions.filter(r => r.totalCount > 0);
+  
+  if (activeRegionsList.length === 0) {
+    const emptyMsg = document.createElement('div');
+    emptyMsg.className = 'empty-regions-msg';
+    emptyMsg.style.cssText = 'color: var(--text-muted); font-size: 0.8rem; text-align: center; padding: 24px 12px; line-height: 1.45;';
+    emptyMsg.innerHTML = `<i class="fa-solid fa-circle-info" style="margin-bottom: 6px; font-size: 1.2rem; display: block; color: var(--text-muted);"></i> 현재 회차에 활성화된 집회 거점이 없습니다.<br>첫 번째로 GPS 인증에 참여해 보세요!`;
+    regionListEl.appendChild(emptyMsg);
+  } else {
+    activeRegionsList.sort((a, b) => b.totalCount - a.totalCount).forEach(region => {
+      const item = document.createElement('div');
+      item.className = 'region-item';
+      item.innerHTML = `
+        <div class="region-info">
+          <span class="region-name">${region.name}</span>
+          <span class="region-desc">${region.description}</span>
+        </div>
+        <span class="region-count">${region.totalCount.toLocaleString()}명</span>
+      `;
 
-    // 사이드바 항목 클릭 시, 해당 지역 마커로 이동 및 팝업 오픈
-    item.addEventListener('click', () => {
-      map.setView([region.lat, region.lng], 10, { animate: true, duration: 1 });
-      
-      // 모바일인 경우 바텀 시트 닫아주기
-      if (dashboardPanel.classList.contains('active-mobile')) {
-        dashboardPanel.classList.remove('active-mobile');
-      }
-      
-      // 약간의 딜레이를 주어 화면 이동 후 팝업 오픈
-      setTimeout(() => {
-        // markerLayerGroup 내에서 해당 좌표와 일치하는 마커 탐색 후 팝업
-        markerLayerGroup.eachLayer(layer => {
-          const latLng = layer.getLatLng();
-          if (latLng.lat === region.lat && latLng.lng === region.lng) {
-            layer.openPopup();
-          }
-        });
-      }, 300);
+      // 사이드바 항목 클릭 시, 해당 지역 마커로 이동 및 팝업 오픈
+      item.addEventListener('click', () => {
+        map.setView([region.lat, region.lng], 10, { animate: true, duration: 1 });
+        
+        // 모바일인 경우 바텀 시트 닫아주기
+        if (dashboardPanel.classList.contains('active-mobile')) {
+          dashboardPanel.classList.remove('active-mobile');
+        }
+        
+        // 약간의 딜레이를 주어 화면 이동 후 팝업 오픈
+        setTimeout(() => {
+          // markerLayerGroup 내에서 해당 좌표와 일치하는 마커 탐색 후 팝업
+          markerLayerGroup.eachLayer(layer => {
+            const latLng = layer.getLatLng();
+            if (latLng.lat === region.lat && latLng.lng === region.lng) {
+              layer.openPopup();
+            }
+          });
+        }, 300);
+      });
+
+      regionListEl.appendChild(item);
     });
-
-    regionListEl.appendChild(item);
-  });
+  }
 
   // 3. 우측 패널: 한줄 의견 피드 렌더링
   feedListEl.innerHTML = '';

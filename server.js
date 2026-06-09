@@ -1,3 +1,5 @@
+process.env.TZ = 'Asia/Seoul'; // 서버 시스템 시간대를 한국 표준시(KST)로 강제 설정
+
 import express from 'express';
 import cors from 'cors';
 import fs from 'fs';
@@ -124,19 +126,7 @@ function checkAndResetSlot() {
     db.regions = JSON.parse(JSON.stringify(REGIONS));
     // 실시간 데이터 리셋
     db.checkIns = [];
-    
-    // 새 회차 초기 안내용 가상 한줄의견 삽입
-    db.messages = [
-      { 
-        id: 'm_init_1', 
-        regionId: 'seoul_jamsil', 
-        regionName: '서울 잠실 (송파)', 
-        message: '새 회차가 시작되었습니다! 현장에 계신 시민분들은 GPS 인증에 동참해 주세요.', 
-        time: new Date(),
-        lat: 37.5133,
-        lng: 127.1001
-      }
-    ];
+    db.messages = [];
     saveDb();
   }
 }
@@ -261,7 +251,7 @@ async function createDynamicRegion(lat, lng) {
     name: name,
     lat: fuzzedLat,
     lng: fuzzedLng,
-    baseCount: Math.floor(Math.random() * 150) + 50, // 최초 개설 시 기본 가상 참여자 시뮬레이션 설정
+    baseCount: 0, // 시작은 0명으로 설정 (실제 인증 시 +1 합산되어 1명으로 표출됨)
     description: '시민 직접 인증 거점'
   };
 
@@ -427,9 +417,9 @@ app.post('/api/checkin', async (req, res) => {
 // 정적 파일 제공 미들웨어 (프론트엔드 호스팅)
 app.use(express.static(path.join(__dirname)));
 
-// 초기 DB 로드, 시뮬레이터 가동 및 포트 실행
+// 초기 DB 로드 및 포트 실행 (시뮬레이터 비활성화)
 loadDb();
-startSimulation();
+// startSimulation();
 
 app.listen(PORT, () => {
   console.log(`=========================================`);

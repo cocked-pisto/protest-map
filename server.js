@@ -45,7 +45,8 @@ let db = {
   activeSlotId: "",
   regions: JSON.parse(JSON.stringify(REGIONS)),
   checkIns: [],
-  messages: []
+  messages: [],
+  notices: ["공정 선거를 위해 평화 시위에 동참해 주시는 시민 여러분 감사합니다."]
 };
 
 // DB 데이터 로드
@@ -58,7 +59,8 @@ function loadDb() {
         ...db,
         ...parsed,
         checkIns: (parsed.checkIns || []).map(c => ({ ...c, time: new Date(c.time) })),
-        messages: (parsed.messages || []).map(m => ({ ...m, time: new Date(m.time) }))
+        messages: (parsed.messages || []).map(m => ({ ...m, time: new Date(m.time) })),
+        notices: parsed.notices || db.notices
       };
     } catch (e) {
       console.error("Failed to load db file, using defaults:", e);
@@ -412,6 +414,31 @@ app.post('/api/checkin', async (req, res) => {
     },
     nearestRegion
   });
+});
+
+// 5. 공지사항 조회 API
+app.get('/api/notices', (req, res) => {
+  res.json(db.notices || []);
+});
+
+// 6. 공지사항 수정 API (간단 비밀번호 보호)
+app.post('/api/admin/notices', (req, res) => {
+  const { password, notices } = req.body;
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '1234'; // 환경변수 지정 또는 기본값 '1234'
+
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: "비밀번호가 일치하지 않습니다." });
+  }
+
+  if (!Array.isArray(notices)) {
+    return res.status(400).json({ error: "공지사항 데이터 형식(배열)이 올바르지 않습니다." });
+  }
+
+  // 앞뒤 공백 제거 및 빈 값 필터링
+  db.notices = notices.map(n => n.trim()).filter(n => n.length > 0);
+  saveDb();
+
+  res.json({ success: true, notices: db.notices });
 });
 
 // 정적 파일 제공 미들웨어 (프론트엔드 호스팅)

@@ -13,6 +13,7 @@ class ProtestApiService {
     };
     this.cachedRegions = [];
     this.cachedMessages = [];
+    this.cachedNotices = [];
 
     this._loadLocalStorage();
     
@@ -75,6 +76,16 @@ class ProtestApiService {
         }));
       }
 
+      // 3.5. 공지사항 데이터 동기화
+      try {
+        const noticesRes = await fetch('/api/notices');
+        if (noticesRes.ok) {
+          this.cachedNotices = await noticesRes.json();
+        }
+      } catch (e) {
+        console.error('Failed to fetch notices:', e);
+      }
+
       // 4. 이벤트 발생시켜 화면 UI 일제 갱신
       window.dispatchEvent(new CustomEvent('protestDataUpdated', {
         detail: {
@@ -84,6 +95,11 @@ class ProtestApiService {
     } catch (e) {
       console.error('Server sync failed:', e);
     }
+  }
+
+  // 공지사항 목록 가져오기
+  getNotices() {
+    return this.cachedNotices || [];
   }
 
   // 현재 슬롯 정보 가져오기

@@ -6,6 +6,12 @@ let markerLayerGroup;
 let userMarker = null;
 let lastKnownUserCoords = null;
 
+// 공지사항 슬라이더 상태 변수
+let currentNoticeIndex = 0;
+let noticesArray = [];
+let noticeInterval = null;
+let lastNoticesJson = '';
+
 // UI 요소 셀렉터
 const totalCountEl = document.getElementById('total-count');
 const headerTotalCountEl = document.getElementById('header-total-count');
@@ -33,6 +39,57 @@ const checkinMessageInput = document.getElementById('checkin-message');
 // 한국 중심 좌표 설정
 const KOREA_CENTER = [36.3, 127.8];
 const DEFAULT_ZOOM = 7.5;
+
+// 공지사항 데이터 동기화 및 슬라이더 작동 함수
+function handleNoticeUpdate() {
+  const notices = apiService.getNotices();
+  const noticesJson = JSON.stringify(notices);
+  if (noticesJson === lastNoticesJson) return; // 변동 없으면 상태 유지
+  lastNoticesJson = noticesJson;
+
+  noticesArray = notices;
+  const noticeTextEl = document.getElementById('notice-text');
+  if (!noticeTextEl) return;
+
+  if (noticesArray.length === 0) {
+    noticeTextEl.textContent = '공지사항이 없습니다.';
+    if (noticeInterval) {
+      clearInterval(noticeInterval);
+      noticeInterval = null;
+    }
+    return;
+  }
+
+  // 첫 공지사항 표시
+  noticeTextEl.textContent = noticesArray[0];
+  currentNoticeIndex = 0;
+
+  // 기존 슬라이더 타이머 초기화
+  if (noticeInterval) {
+    clearInterval(noticeInterval);
+    noticeInterval = null;
+  }
+
+  if (noticesArray.length <= 1) return;
+
+  // 슬라이드 애니메이션 주기 실행 (5초)
+  noticeInterval = setInterval(() => {
+    noticeTextEl.classList.add('slide-out');
+
+    setTimeout(() => {
+      currentNoticeIndex = (currentNoticeIndex + 1) % noticesArray.length;
+      noticeTextEl.textContent = noticesArray[currentNoticeIndex];
+
+      noticeTextEl.classList.remove('slide-out');
+      noticeTextEl.classList.add('slide-in');
+
+      // 리플로우 강제 유발
+      noticeTextEl.offsetHeight;
+
+      noticeTextEl.classList.remove('slide-in');
+    }, 400); // 0.4초 CSS 트랜지션 동기화
+  }, 5000);
+}
 
 // 초기화 함수
 function init() {
@@ -70,6 +127,7 @@ function init() {
 function runApp() {
   initMap();
   updateDashboard();
+  handleNoticeUpdate();
   setupEventListeners();
   startSlotCountdown();
   updateButtonState();
@@ -268,6 +326,7 @@ function setupEventListeners() {
 
     // 대시보드 정보 갱신
     updateDashboard();
+    handleNoticeUpdate();
 
     // 마커 갱신 (전국 카운트 변동 반영)
     renderProtestMarkers();

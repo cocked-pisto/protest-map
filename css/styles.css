@@ -1041,3 +1041,74 @@ header {
   color: var(--accent-orange);
   font-weight: 700;
 }
+
+/* Notice Bar Styling */
+.header-notice-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 4px;
+  padding-top: 8px;
+  overflow: hidden;
+}
+
+.notice-badge {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--accent-red);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.notice-badge i {
+  font-size: 0.65rem;
+  animation: notice-bell-ring 2.5s infinite;
+}
+
+@keyframes notice-bell-ring {
+  0%, 100% { transform: rotate(0); }
+  10%, 30% { transform: rotate(15deg); }
+  20%, 40% { transform: rotate(-15deg); }
+  50% { transform: rotate(0); }
+}
+
+.notice-body {
+  flex-grow: 1;
+  overflow: hidden;
+  height: 18px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.notice-text {
+  font-size: 0.75rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: block;
+  width: 100%;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.notice-text.slide-out {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.notice-text.slide-in {
+  opacity: 0;
+  transform: translateY(10px);
+}

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 공지사항 관리자 대시보드</title>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+
+    :root {
+      --bg-primary: #090d16;
+      --bg-card: rgba(15, 22, 38, 0.7);
+      --border-color: rgba(255, 255, 255, 0.07);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent-red: #ef4444;
+      --accent-green: #10b981;
+      --accent-orange: #f97316;
+      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header i {
+      font-size: 2.5rem;
+      color: var(--accent-red);
+      text-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+      margin-bottom: 12px;
+    }
+
+    .header h1 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.6rem;
+      background: linear-gradient(135deg, #ff4e50, #f9d423);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .input-control {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+
+    .input-control:focus {
+      border-color: var(--accent-red);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .notice-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .notice-item {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid var(--border-color);
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .notice-input {
+      flex-grow: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+    }
+
+    .btn-icon {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .btn-icon:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--accent-red);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-add {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed var(--border-color);
+      color: var(--text-secondary);
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      margin-bottom: 24px;
+    }
+
+    .btn-add:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-primary);
+      border-color: var(--text-secondary);
+    }
+
+    .btn-save {
+      width: 100%;
+      background: linear-gradient(135deg, #ef4444, #ea580c);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2);
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-save:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 25px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-save:active {
+      transform: translateY(0);
+    }
+
+    .status-msg {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      display: none;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .status-success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: var(--accent-green);
+    }
+
+    .status-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: var(--accent-red);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <i class="fa-solid fa-bullhorn"></i>
+      <h1>Notice Admin Dashboard</h1>
+      <p>서버 재부팅 없이 실시간으로 지도의 공지사항 목록을 관리합니다.</p>
+    </div>
+
+    <div class="form-group">
+      <label for="admin-password">관리자 암호</label>
+      <input type="password" id="admin-password" class="input-control" placeholder="관리자 비밀번호를 입력하세요 (기본: 1234)">
+    </div>
+
+    <div class="form-group">
+      <label>공지사항 목록 (순서대로 실시간 슬라이드 노출)</label>
+      <div class="notice-list" id="notice-list-container">
+        <!-- Javascript will inject inputs here -->
+      </div>
+      <button class="btn-add" id="btn-add-notice" type="button">
+        <i class="fa-solid fa-plus"></i> 새 공지사항 추가
+      </button>
+    </div>
+
+    <button class="btn-save" id="btn-save-notices" type="button">
+      <i class="fa-solid fa-cloud-arrow-up"></i> 공지사항 저장 및 적용
+    </button>
+
+    <div class="status-msg" id="status-display"></div>
+  </div>
+
+  <script>
+    const container = document.getElementById('notice-list-container');
+    const addBtn = document.getElementById('btn-add-notice');
+    const saveBtn = document.getElementById('btn-save-notices');
+    const passwordInput = document.getElementById('admin-password');
+    const statusDisplay = document.getElementById('status-display');
+
+    // 초기 공지사항 목록 불러오기
+    async function loadNotices() {
+      try {
+        const res = await fetch('/api/notices');
+        if (res.ok) {
+          const notices = await res.json();
+          container.innerHTML = '';
+          if (notices.length === 0) {
+            addNoticeRow('');
+          } else {
+            notices.forEach(notice => addNoticeRow(notice));
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load notices', err);
+        showStatus('공지사항을 가져오지 못했습니다.', 'error');
+      }
+    }
+
+    // 입력 필드 행 추가 함수
+    function addNoticeRow(text = '') {
+      const row = document.createElement('div');
+      row.className = 'notice-item';
+      row.innerHTML = `
+        <i class="fa-solid fa-hashtag" style="color:var(--text-secondary); font-size:0.8rem; margin:0 4px;"></i>
+        <input type="text" class="notice-input" value="${escapeHtml(text)}" placeholder="슬라이드로 표시할 공지사항 문구를 입력하세요.">
+        <button class="btn-icon btn-delete" type="button" title="삭제">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+      `;
+
+      // 삭제 이벤트 설정
+      row.querySelector('.btn-delete').addEventListener('click', () => {
+        row.remove();
+        if (container.children.length === 0) {
+          addNoticeRow('');
+        }
+      });
+
+      container.appendChild(row);
+    }
+
+    // 상태 메세지 표출
+    function showStatus(msg, type) {
+      statusDisplay.style.display = 'block';
+      statusDisplay.textContent = msg;
+      statusDisplay.className = `status-msg status-${type}`;
+      
+      setTimeout(() => {
+        statusDisplay.style.display = 'none';
+      }, 4000);
+    }
+
+    // XSS 보호 이스케이프
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // 새 공지사항 추가 버튼
+    addBtn.addEventListener('click', () => addNoticeRow(''));
+
+    // 저장 버튼 클릭 시 서버 전송
+    saveBtn.addEventListener('click', async () => {
+      const password = passwordInput.value;
+      if (!password) {
+        showStatus('관리자 암호를 입력해야 합니다.', 'error');
+        passwordInput.focus();
+        return;
+      }
+
+      // 입력 값들을 추출
+      const inputs = container.querySelectorAll('.notice-input');
+      const notices = [];
+      inputs.forEach(input => {
+        const val = input.value.trim();
+        if (val) notices.push(val);
+      });
+
+      if (notices.length === 0) {
+        showStatus('최소 하나의 공지사항을 입력해 주세요.', 'error');
+        return;
+      }
+
+      saveBtn.disabled = true;
+      const originalText = saveBtn.innerHTML;
+      saveBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> 저장 중...`;
+
+      try {
+        const res = await fetch('/api/admin/notices', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ password, notices })
+        });
+
+        const result = await res.json();
+        if (res.ok && result.success) {
+          showStatus('공지사항이 성공적으로 서버에 반영 및 영속 저장되었습니다!', 'success');
+          // 필드 갱신
+          container.innerHTML = '';
+          result.notices.forEach(n => addNoticeRow(n));
+        } else {
+          showStatus(result.error || '저장에 실패했습니다.', 'error');
+        }
+      } catch (err) {
+        console.error('Save failed', err);
+        showStatus('서버 통신 에러가 발생했습니다.', 'error');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalText;
+      }
+    });
+
+    // 시작 시 로드
+    window.addEventListener('DOMContentLoaded', loadNotices);
+  </script>
+</body>
+</html>

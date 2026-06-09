@@ -896,3 +896,108 @@ header {
     right: 12px;
   }
 }
+
+/* Support Card (Donation) Styling */
+.support-card-container {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.support-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: var(--transition-smooth);
+}
+
+.support-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.support-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.support-card-header i {
+  color: #ffe812;
+  font-size: 1rem;
+  text-shadow: 0 0 8px rgba(255, 232, 18, 0.4);
+}
+
+.support-card-desc {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.support-pay-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  background: #ffe812;
+  color: #191919;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 10px 14px;
+  border-radius: 8px;
+  transition: var(--transition-smooth);
+  box-shadow: 0 4px 12px rgba(255, 232, 18, 0.15);
+}
+
+.support-pay-btn:hover {
+  background: #ffec3d;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 232, 18, 0.3);
+}
+
+.support-pay-btn:active {
+  transform: translateY(0);
+}
+
+.support-pay-btn .pay-logo-kakao {
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+
+.support-pay-btn .pay-logo-pay {
+  font-weight: 500;
+}
+
+.support-pay-btn i {
+  font-size: 0.75rem;
+  margin-left: auto;
+  color: #191919;
+}
+
+/* Mobile-specific adjustments for support card */
+@media (max-width: 768px) {
+  .left-panel.active-mobile .support-card-container {
+    margin-top: 12px;
+    padding-top: 12px;
+    padding-bottom: 8px;
+  }
+  
+  .left-panel.active-mobile .support-card {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  
+  .left-panel.active-mobile .support-card-desc {
+    font-size: 0.7rem;
+  }
+}
+

@@ -29,16 +29,6 @@ if (!fs.existsSync(DB_DIR)) {
   fs.mkdirSync(DB_DIR, { recursive: true });
 }
 
-// 가상 피드 메시지 템플릿
-const SIMULATED_TEMPLATES = [
-  { message: '현재 참가 인원이 폭발적으로 늘고 있습니다. 다들 조심히 오세요!' },
-  { message: '나라의 주권은 국민에게 있습니다. 부정선거 절대 묵과할 수 없습니다.' },
-  { message: '공정선거 쟁취를 위한 평화 시위! 대열 정비 완료했습니다.' },
-  { message: '피켓 무료 나눔 중입니다. 본부 텐트 쪽으로 오셔서 받아가세요!' },
-  { message: '생수와 간식 후원 받았습니다. 안내소에서 나눠드리고 있습니다.' },
-  { message: '자유 발언대 참여하실 분들은 운영진 메가폰 쪽으로 신청해 주세요.' },
-  { message: '질서 정연하게 쓰레기 봉투 나눠 들고 주변 정리하며 진행 중입니다. 모범 시민 최고!' }
-];
 
 // 초기 DB 상태 구조 정의
 let db = {
@@ -288,33 +278,6 @@ function startSimulation() {
       }
     });
 
-    // 2. 20% 확률로 가상 참여 한줄의견 게시 (잠실만 진행)
-    if (Math.random() < 0.20 && db.regions.length > 0) {
-      const jamsilRegion = db.regions.find(r => r.id === 'seoul_jamsil');
-      if (jamsilRegion) {
-        const template = SIMULATED_TEMPLATES[Math.floor(Math.random() * SIMULATED_TEMPLATES.length)];
-        
-        const simLat = jamsilRegion.lat + (Math.random() * 0.003 - 0.0015);
-        const simLng = jamsilRegion.lng + (Math.random() * 0.003 - 0.0015);
-
-        const newMsg = {
-          id: 'sim_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-          regionId: jamsilRegion.id,
-          regionName: jamsilRegion.name,
-          message: template.message,
-          time: new Date(),
-          lat: simLat,
-          lng: simLng
-        };
-
-        db.messages.unshift(newMsg);
-        
-        // 최대 100개 피드 유지
-        if (db.messages.length > 100) {
-          db.messages.pop();
-        }
-      }
-    }
     
     saveDb();
   }, 4000);

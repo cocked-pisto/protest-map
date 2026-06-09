@@ -235,56 +235,70 @@
 <body>
 
   <div class="container">
-    <div class="header">
-      <i class="fa-solid fa-bullhorn"></i>
-      <h1>Notice Admin Dashboard</h1>
-      <p>서버 재부팅 없이 실시간으로 지도의 공지사항 목록을 관리합니다.</p>
-    </div>
-
-    <div class="form-group">
-      <label for="admin-password">관리자 암호</label>
-      <input type="password" id="admin-password" class="input-control" placeholder="관리자 비밀번호를 입력하세요 (기본: 1234)">
-    </div>
-
-    <div class="form-group">
-      <label>공지사항 목록 (순서대로 실시간 슬라이드 노출)</label>
-      <div class="notice-list" id="notice-list-container">
-        <!-- Javascript will inject inputs here -->
+    <!-- 1. 로그인 패널 (기본값 노출) -->
+    <div id="login-panel" style="display: block;">
+      <div class="header">
+        <i class="fa-solid fa-lock" style="color: var(--accent-orange); text-shadow: 0 0 15px rgba(249, 115, 22, 0.4); font-size: 2.5rem; margin-bottom: 16px; display: inline-block;"></i>
+        <h1>Admin Login</h1>
+        <p>대시보드 접속을 위해 관리자 암호를 입력하세요.</p>
       </div>
-      <button class="btn-add" id="btn-add-notice" type="button">
-        <i class="fa-solid fa-plus"></i> 새 공지사항 추가
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label for="admin-password">관리자 비밀번호</label>
+        <input type="password" id="admin-password" class="input-control" placeholder="비밀번호를 입력하세요" autofocus>
+      </div>
+      <button class="btn-save" id="btn-login" type="button" style="background: linear-gradient(135deg, #f97316, #ea580c); box-shadow: 0 10px 20px rgba(249, 115, 22, 0.2);">
+        <i class="fa-solid fa-key"></i> 로그인 및 접속
       </button>
     </div>
 
-    <button class="btn-save" id="btn-save-notices" type="button">
-      <i class="fa-solid fa-cloud-arrow-up"></i> 공지사항 저장 및 적용
-    </button>
+    <!-- 2. 대시보드 패널 (로그인 성공 시 노출) -->
+    <div id="dashboard-panel" style="display: none;">
+      <div class="header">
+        <i class="fa-solid fa-bullhorn"></i>
+        <h1>Notice Admin Dashboard</h1>
+        <p>서버 재부팅 없이 실시간으로 지도의 공지사항 목록을 관리합니다.</p>
+      </div>
 
-    <div class="form-group" style="margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 24px;">
-      <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <span>실시간 참여 현황 (현재 회차)</span>
-        <button id="btn-refresh-stats" type="button" class="btn-icon" style="width: 28px; height: 28px; font-size: 0.75rem;" title="새로고침">
-          <i class="fa-solid fa-rotate"></i>
+      <div class="form-group">
+        <label>공지사항 목록 (순서대로 실시간 슬라이드 노출)</label>
+        <div class="notice-list" id="notice-list-container">
+          <!-- Javascript will inject inputs here -->
+        </div>
+        <button class="btn-add" id="btn-add-notice" type="button">
+          <i class="fa-solid fa-plus"></i> 새 공지사항 추가
         </button>
-      </label>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-        <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.15); border-radius: 12px; padding: 16px; text-align: center;">
-          <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px;"><i class="fa-solid fa-street-view"></i> 순수 실제 GPS 인증 수</div>
-          <div id="stat-real-count" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-green);">0</div>
-        </div>
-        <div style="background: rgba(249, 115, 22, 0.05); border: 1px solid rgba(249, 115, 22, 0.15); border-radius: 12px; padding: 16px; text-align: center;">
-          <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px;"><i class="fa-solid fa-users"></i> 표시 참여자 수 (잠실 시뮬 포함)</div>
-          <div id="stat-total-count" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-orange);">0</div>
-        </div>
       </div>
 
-      <button class="btn-add" id="btn-show-checkins" type="button" style="border-style: solid; border-color: rgba(255,255,255,0.1); margin-bottom: 16px;">
-        <i class="fa-solid fa-list-check"></i> 실제 GPS 인증 상세 내역 조회
+      <button class="btn-save" id="btn-save-notices" type="button" style="margin-bottom: 24px;">
+        <i class="fa-solid fa-cloud-arrow-up"></i> 공지사항 저장 및 적용
       </button>
 
-      <div id="checkins-list-wrapper" style="display: none; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; max-height: 240px; overflow-y: auto; margin-bottom: 16px;">
-        <div id="checkins-list-container" style="display: flex; flex-direction: column; gap: 10px; font-size: 0.82rem; color: var(--text-secondary);">
-          <!-- Javascript will inject list items here -->
+      <div class="form-group" style="border-top: 1px solid var(--border-color); padding-top: 24px;">
+        <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span>실시간 참여 현황 (현재 회차)</span>
+          <button id="btn-refresh-stats" type="button" class="btn-icon" style="width: 28px; height: 28px; font-size: 0.75rem;" title="새로고침">
+            <i class="fa-solid fa-rotate"></i>
+          </button>
+        </label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+          <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.15); border-radius: 12px; padding: 16px; text-align: center;">
+            <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px;"><i class="fa-solid fa-street-view"></i> 순수 실제 GPS 인증 수</div>
+            <div id="stat-real-count" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-green);">0</div>
+          </div>
+          <div style="background: rgba(249, 115, 22, 0.05); border: 1px solid rgba(249, 115, 22, 0.15); border-radius: 12px; padding: 16px; text-align: center;">
+            <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px;"><i class="fa-solid fa-users"></i> 표시 참여자 수 (잠실 시뮬 포함)</div>
+            <div id="stat-total-count" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-orange);">0</div>
+          </div>
+        </div>
+
+        <button class="btn-add" id="btn-show-checkins" type="button" style="border-style: solid; border-color: rgba(255,255,255,0.1); margin-bottom: 16px;">
+          <i class="fa-solid fa-list-check"></i> 실제 GPS 인증 상세 내역 조회
+        </button>
+
+        <div id="checkins-list-wrapper" style="display: none; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; max-height: 240px; overflow-y: auto; margin-bottom: 16px;">
+          <div id="checkins-list-container" style="display: flex; flex-direction: column; gap: 10px; font-size: 0.82rem; color: var(--text-secondary);">
+            <!-- Javascript will inject list items here -->
+          </div>
         </div>
       </div>
     </div>
@@ -293,10 +307,14 @@
   </div>
 
   <script>
+    const loginPanel = document.getElementById('login-panel');
+    const dashboardPanel = document.getElementById('dashboard-panel');
+    const loginBtn = document.getElementById('btn-login');
+    const passwordInput = document.getElementById('admin-password');
+
     const container = document.getElementById('notice-list-container');
     const addBtn = document.getElementById('btn-add-notice');
     const saveBtn = document.getElementById('btn-save-notices');
-    const passwordInput = document.getElementById('admin-password');
     const statusDisplay = document.getElementById('status-display');
 
     const realCountEl = document.getElementById('stat-real-count');
@@ -305,6 +323,60 @@
     const showCheckinsBtn = document.getElementById('btn-show-checkins');
     const checkinsWrapper = document.getElementById('checkins-list-wrapper');
     const checkinsContainer = document.getElementById('checkins-list-container');
+
+    let adminPassword = '';
+
+    // 로그인 확인 및 접속 요청
+    loginBtn.addEventListener('click', handleLogin);
+    passwordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleLogin();
+    });
+
+    async function handleLogin() {
+      const password = passwordInput.value;
+      if (!password) {
+        showStatus('비밀번호를 입력하세요.', 'error');
+        passwordInput.focus();
+        return;
+      }
+
+      loginBtn.disabled = true;
+      const originalText = loginBtn.innerHTML;
+      loginBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> 인증 중...`;
+
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ password })
+        });
+
+        if (res.ok) {
+          adminPassword = password;
+          passwordInput.value = ''; // 비밀번호 입력란 비우기
+          
+          // 화면 전환
+          loginPanel.style.display = 'none';
+          dashboardPanel.style.display = 'block';
+          
+          // 데이터 로드
+          await loadNotices();
+          await loadStats();
+          showStatus('로그인에 성공했습니다.', 'success');
+        } else {
+          showStatus('비밀번호가 올바르지 않습니다.', 'error');
+          passwordInput.focus();
+        }
+      } catch (err) {
+        console.error('Login failed', err);
+        showStatus('서버 연결에 실패했습니다.', 'error');
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = originalText;
+      }
+    }
 
     // 초기 공지사항 목록 불러오기
     async function loadNotices() {
@@ -375,10 +447,8 @@
 
     // 저장 버튼 클릭 시 서버 전송
     saveBtn.addEventListener('click', async () => {
-      const password = passwordInput.value;
-      if (!password) {
-        showStatus('관리자 암호를 입력해야 합니다.', 'error');
-        passwordInput.focus();
+      if (!adminPassword) {
+        showStatus('로그인 세션이 만료되었습니다. 다시 로그인하세요.', 'error');
         return;
       }
 
@@ -405,7 +475,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ password, notices })
+          body: JSON.stringify({ password: adminPassword, notices })
         });
 
         const result = await res.json();
@@ -443,10 +513,8 @@
     refreshStatsBtn.addEventListener('click', loadStats);
 
     showCheckinsBtn.addEventListener('click', async () => {
-      const password = passwordInput.value;
-      if (!password) {
-        showStatus('관리자 암호를 입력해야 합니다.', 'error');
-        passwordInput.focus();
+      if (!adminPassword) {
+        showStatus('로그인 세션이 만료되었습니다. 다시 로그인하세요.', 'error');
         return;
       }
 
@@ -460,7 +528,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ password })
+          body: JSON.stringify({ password: adminPassword })
         });
 
         const result = await res.json();
@@ -499,12 +567,6 @@
         showCheckinsBtn.disabled = false;
         showCheckinsBtn.innerHTML = originalText;
       }
-    });
-
-    // 시작 시 로드
-    window.addEventListener('DOMContentLoaded', () => {
-      loadNotices();
-      loadStats();
     });
   </script>
 </body>

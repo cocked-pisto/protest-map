@@ -439,6 +439,18 @@ app.post('/api/admin/checkins', (req, res) => {
   });
 });
 
+// 8. 관리자 암호 인증 API
+app.post('/api/admin/login', (req, res) => {
+  const { password } = req.body;
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '88888888';
+
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: "비밀번호가 일치하지 않습니다." });
+  }
+
+  res.json({ success: true });
+});
+
 // 정적 파일 제공 미들웨어 (프론트엔드 호스팅)
 app.use(express.static(path.join(__dirname)));
 

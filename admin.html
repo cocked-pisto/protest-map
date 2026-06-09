@@ -260,6 +260,35 @@
       <i class="fa-solid fa-cloud-arrow-up"></i> 공지사항 저장 및 적용
     </button>
 
+    <div class="form-group" style="margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 24px;">
+      <label style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span>실시간 참여 현황 (현재 회차)</span>
+        <button id="btn-refresh-stats" type="button" class="btn-icon" style="width: 28px; height: 28px; font-size: 0.75rem;" title="새로고침">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
+      </label>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+        <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.15); border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px;"><i class="fa-solid fa-street-view"></i> 순수 실제 GPS 인증 수</div>
+          <div id="stat-real-count" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-green);">0</div>
+        </div>
+        <div style="background: rgba(249, 115, 22, 0.05); border: 1px solid rgba(249, 115, 22, 0.15); border-radius: 12px; padding: 16px; text-align: center;">
+          <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 6px;"><i class="fa-solid fa-users"></i> 표시 참여자 수 (잠실 시뮬 포함)</div>
+          <div id="stat-total-count" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-orange);">0</div>
+        </div>
+      </div>
+
+      <button class="btn-add" id="btn-show-checkins" type="button" style="border-style: solid; border-color: rgba(255,255,255,0.1); margin-bottom: 16px;">
+        <i class="fa-solid fa-list-check"></i> 실제 GPS 인증 상세 내역 조회
+      </button>
+
+      <div id="checkins-list-wrapper" style="display: none; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; max-height: 240px; overflow-y: auto; margin-bottom: 16px;">
+        <div id="checkins-list-container" style="display: flex; flex-direction: column; gap: 10px; font-size: 0.82rem; color: var(--text-secondary);">
+          <!-- Javascript will inject list items here -->
+        </div>
+      </div>
+    </div>
+
     <div class="status-msg" id="status-display"></div>
   </div>
 
@@ -269,6 +298,13 @@
     const saveBtn = document.getElementById('btn-save-notices');
     const passwordInput = document.getElementById('admin-password');
     const statusDisplay = document.getElementById('status-display');
+
+    const realCountEl = document.getElementById('stat-real-count');
+    const totalCountEl = document.getElementById('stat-total-count');
+    const refreshStatsBtn = document.getElementById('btn-refresh-stats');
+    const showCheckinsBtn = document.getElementById('btn-show-checkins');
+    const checkinsWrapper = document.getElementById('checkins-list-wrapper');
+    const checkinsContainer = document.getElementById('checkins-list-container');
 
     // 초기 공지사항 목록 불러오기
     async function loadNotices() {
@@ -390,8 +426,86 @@
       }
     });
 
+    // 실시간 참여 통계 가져오기
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/stats');
+        if (res.ok) {
+          const stats = await res.json();
+          realCountEl.textContent = stats.userCheckInsCount.toLocaleString();
+          totalCountEl.textContent = stats.totalProtesters.toLocaleString();
+        }
+      } catch (err) {
+        console.error('Failed to load stats', err);
+      }
+    }
+
+    refreshStatsBtn.addEventListener('click', loadStats);
+
+    showCheckinsBtn.addEventListener('click', async () => {
+      const password = passwordInput.value;
+      if (!password) {
+        showStatus('관리자 암호를 입력해야 합니다.', 'error');
+        passwordInput.focus();
+        return;
+      }
+
+      showCheckinsBtn.disabled = true;
+      const originalText = showCheckinsBtn.innerHTML;
+      showCheckinsBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> 조회 중...`;
+
+      try {
+        const res = await fetch('/api/admin/checkins', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ password })
+        });
+
+        const result = await res.json();
+        if (res.ok && result.success) {
+          checkinsWrapper.style.display = 'block';
+          checkinsContainer.innerHTML = '';
+          
+          if (result.checkIns.length === 0) {
+            checkinsContainer.innerHTML = '<div style="text-align:center; padding:10px;">현재 회차에 실제 등록된 GPS 인증 내역이 없습니다.</div>';
+          } else {
+            result.checkIns.forEach(c => {
+              const item = document.createElement('div');
+              item.style.cssText = 'border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 4px;';
+              
+              const timeStr = new Date(c.time).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+              const msgHtml = c.message ? `<div style="color:var(--text-primary); background:rgba(255,255,255,0.03); padding:6px; border-radius:6px; margin-top:4px;">${escapeHtml(c.message)}</div>` : '<div style="color:var(--text-secondary); font-style:italic; margin-top:2px;">(한줄평 없음)</div>';
+              
+              item.innerHTML = `
+                <div style="display:flex; justify-content:space-between; font-weight:600; font-size:0.78rem;">
+                  <span style="color:var(--accent-green);"><i class="fa-solid fa-location-dot"></i> ${escapeHtml(c.regionName)}</span>
+                  <span style="color:var(--text-secondary);">${timeStr}</span>
+                </div>
+                ${msgHtml}
+              `;
+              checkinsContainer.appendChild(item);
+            });
+          }
+          showStatus('GPS 인증 상세 내역을 성공적으로 조회했습니다.', 'success');
+        } else {
+          showStatus(result.error || '조회에 실패했습니다.', 'error');
+        }
+      } catch (err) {
+        console.error('Fetch checkins failed', err);
+        showStatus('서버 통신 에러가 발생했습니다.', 'error');
+      } finally {
+        showCheckinsBtn.disabled = false;
+        showCheckinsBtn.innerHTML = originalText;
+      }
+    });
+
     // 시작 시 로드
-    window.addEventListener('DOMContentLoaded', loadNotices);
+    window.addEventListener('DOMContentLoaded', () => {
+      loadNotices();
+      loadStats();
+    });
   </script>
 </body>
 </html>

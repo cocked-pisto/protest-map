@@ -262,14 +262,31 @@ async function createDynamicRegion(lat, lng) {
 }
 
 // 4초 간격 서버 사이드 실시간 가상 참여자 수 및 메시지 변동 시뮬레이터
+// 4초 간격 서버 사이드 실시간 가상 참여자 수 및 메시지 변동 시뮬레이터
 function startSimulation() {
   setInterval(() => {
     checkAndResetSlot();
     
+    const currentSlot = getCurrentSlot();
+    const now = new Date();
+    const totalDuration = currentSlot.endDate.getTime() - currentSlot.startDate.getTime();
+    const elapsed = now.getTime() - currentSlot.startDate.getTime();
+    
+    // 진행 비율 계산 (0.0 ~ 1.0)
+    let ratio = elapsed / totalDuration;
+    if (ratio < 0) ratio = 0;
+    if (ratio > 1) ratio = 1;
+
     // 1. 각 활성화 지역 인원 미세 변동
     db.regions.forEach(region => {
-      const change = Math.floor(Math.random() * 9) - 4; // -4 ~ +4
-      region.baseCount = Math.max(10, region.baseCount + change);
+      if (region.id === 'seoul_jamsil') {
+        // 잠실 개표소: 1 ~ 99 범위 내에서 시간 진행률에 비례하여 증가
+        // 3시간 타이머가 끝나 새 슬롯이 시작되면 checkAndResetSlot()에서 0으로 초기화된 후 다시 1부터 증가함
+        region.baseCount = Math.max(1, Math.min(99, Math.floor(1 + ratio * 98)));
+      } else {
+        const change = Math.floor(Math.random() * 9) - 4; // -4 ~ +4
+        region.baseCount = Math.max(10, region.baseCount + change);
+      }
     });
 
     // 2. 20% 확률로 가상 참여 한줄의견 게시
@@ -297,8 +314,10 @@ function startSimulation() {
         db.messages.pop();
       }
 
-      // 기지 카운터 가산
-      randomRegion.baseCount += Math.floor(Math.random() * 3) + 1;
+      // 잠실이 아닌 경우에만 기지 카운터 가산 (잠실은 정확히 비례 계산식만 따름)
+      if (randomRegion.id !== 'seoul_jamsil') {
+        randomRegion.baseCount += Math.floor(Math.random() * 3) + 1;
+      }
     }
     
     saveDb();
@@ -444,9 +463,9 @@ app.post('/api/admin/notices', (req, res) => {
 // 정적 파일 제공 미들웨어 (프론트엔드 호스팅)
 app.use(express.static(path.join(__dirname)));
 
-// 초기 DB 로드 및 포트 실행 (시뮬레이터 비활성화)
+// 초기 DB 로드 및 포트 실행 (시뮬레이터 활성화)
 loadDb();
-// startSimulation();
+startSimulation();
 
 app.listen(PORT, () => {
   console.log(`=========================================`);

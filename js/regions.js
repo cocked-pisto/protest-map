@@ -6,7 +6,7 @@ export const REGIONS = [
     lat: 37.5133,
     lng: 127.1001,
     baseCount: 0,
-    description: "잠실역 사거리 및 교통회관 일대"
+    description: "송파 잠실 개표소 및 교통회관 일대"
   },
   {
     id: "daejeon_station",

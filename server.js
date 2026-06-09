@@ -424,7 +424,7 @@ app.get('/api/notices', (req, res) => {
 // 6. 공지사항 수정 API (간단 비밀번호 보호)
 app.post('/api/admin/notices', (req, res) => {
   const { password, notices } = req.body;
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '1234'; // 환경변수 지정 또는 기본값 '1234'
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '88888888'; // 환경변수 지정 또는 기본값 '88888888'
 
   if (password !== ADMIN_PASSWORD) {
     return res.status(401).json({ error: "비밀번호가 일치하지 않습니다." });

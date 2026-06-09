@@ -36,6 +36,38 @@ const DEFAULT_ZOOM = 7.5;
 
 // 초기화 함수
 function init() {
+  const loader = document.getElementById('initial-loader');
+  const progressFill = document.getElementById('loader-progress');
+  const timerEl = document.getElementById('loader-timer');
+
+  // 첫 프레임에서 트랜지션 작동을 위해 약간의 지연 후 width 설정 시작
+  setTimeout(() => {
+    if (progressFill) progressFill.style.width = '100%';
+  }, 100);
+
+  let timeLeft = 5;
+  const interval = setInterval(() => {
+    timeLeft -= 1;
+    if (timerEl) timerEl.textContent = timeLeft;
+
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      if (loader) {
+        loader.style.opacity = '0';
+        loader.style.transition = 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+        setTimeout(() => {
+          loader.remove();
+          runApp();
+        }, 600);
+      } else {
+        runApp();
+      }
+    }
+  }, 1000);
+}
+
+// 실제 앱 구동 함수
+function runApp() {
   initMap();
   updateDashboard();
   setupEventListeners();
@@ -52,6 +84,7 @@ function init() {
     }
   }
 }
+
 
 // 지도 초기화
 function initMap() {
